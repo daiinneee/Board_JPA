@@ -28,7 +28,7 @@ public class Board {
 	// 해당 멤버가 엔티티의 PK임을 의미
     @Id
     /* MySQL은 자동 증가(AUTO_INCREMENT)를 지원하는 DB
-     * PK 자동 증가를 지원하는 DV는 해당 어노테이션을 선언해야 함
+     * PK 자동 증가를 지원하는 DB는 해당 어노테이션을 선언해야 함
      * 오라클과 같이 시퀀스를 이용하는 DB는 GenerationType.SEQUENCE를 이용해야 하며,
      * GenerationType.AUTO로 설정하게 되면 DB에서 제공하는 PK 생성 전략을 가져가게 됨
      */
