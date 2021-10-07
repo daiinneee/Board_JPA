@@ -60,6 +60,14 @@ public class Board {
         this.deleteYn = deleteYn;
     }
     
+    // 게시글 수정 기능 추가하기
+    public void update(String title, String content, String writer) {
+        this.title = title;
+        this.content = content;
+        this.writer = writer;
+        this.modifiedDate = LocalDateTime.now();
+    }
+    
     /* @Setter가 없다?
      * -> 해당 엔티티 클래스에는 @Setter가 없음
      *    엔티티 클래스는 테이블 그 자체
