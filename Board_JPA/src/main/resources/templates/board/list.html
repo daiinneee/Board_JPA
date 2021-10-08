@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<!-- "layout"의 layout은 templates/layout.html, 즉 layout.html 파일의 경로를 의미 -->
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" layout:decorator="layout">
+
+	<!-- layout.html의 content fragment를 채우기 위한 태그 -->
+	<!-- layout.html의 content를 list.html의 content에 선언한 HTML로 렌더링 -->
+    <th:block layout:fragment="content">
+    <!--/* 검색 영역 */-->
+    <div class="input-group" id="adv-search">
+        <select id="searchType" class="form-control" style="width: 100px;">
+            <option value="">전체</option>
+            <option value="title">제목</option>
+            <option value="content">내용</option>
+            <option value="writer">작성자</option>
+        </select>
+        <input type="text" id="searchKeyword" class="form-control" placeholder="키워드를 입력해 주세요." style="width: 300px;" />
+        <button type="button" class="btn btn-primary">
+            <span aria-hidden="true" class="glyphicon glyphicon-search"></span>
+        </button>
+    </div>
+
+    <!--/* 게시글 영역 */-->
+    <div class="table-responsive clearfix">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>번호</th>
+                    <th>제목</th>
+                    <th>작성자</th>
+                    <th>등록일</th>
+                    <th>조회 수</th>
+                </tr>
+            </thead>
+
+            <!--/* 게시글 리스트 Rendering 영역 */-->
+            <tbody id="list">
+
+            </tbody>
+        </table>
+        <div class="btn_wrap text-right">
+            <a class="btn btn-primary waves-effect waves-light">Write</a>
+        </div>
+
+        <!-- 페이지네이션 Rendering 영역 -->
+        <nav>
+
+        </nav>
+    </div>
+    </th:block>
+
+	<!-- layout.html의 script fragment를 채우기 위한 태그 -->
+	<!-- content와 마찬가지로, layout.html의 script를 list.html의 script에 선언한 JS 코드로 렌더링 -->
+    <th:block layout:fragment="script">
+    
+    <!-- JS 코드에서 타임리프 문법을 사용하기 위해서는 th:inline="javascript"를 선언해야 하며,
+         스크립트의 시작과 끝 태그를 CDATA로 묶어줘야 함 -->
+    <script th:inline="javascript">
+	/*<![CDATA[*/
+		/**
+		 * window.onloate() 함수 : 페이지 로딩 시점에 실행되는 함수, 페이지에 접근했을 때 게시글 리트를 조회하는 findAll() 메소드를 실행
+		 */
+		window.onload = () => {
+
+			findAll();
+		}
+
+		/**
+		 * 게시글 리스트 조회
+		 */
+		// 게시글 리스트를 조회하는 API를 호출하는 용도의 함수
+		function findAll() {
+
+			/* 
+			 * jQuery의 Ajax를 사용하지 않고, fetch() 함수 사용
+			 * Fetch API : jQuery의 Ajax보다 API를 간편하게 호출할 수 있도록 브라우저에서 제공해주는 API
+			 * 			   request, axios, jQuery와 같은 라이브러리가 아닌 브라우저에서 제공해 주는 함수
+			 */
+			 
+			// 82 - 86
+			// 첫 번째 then() 안의 response는 Promise 객체, Promise의 ok 상태가 true인 경우,
+			// 즉, 정상적으로 API가 호출된 경우에만 게시글 리스트(JSON)를 리턴
+			fetch('/api/boards').then(response => {
+				if (response.ok) {
+   					return response.json();
+				}
+			}).then(json => {  // 리턴된 JSON은 이 then() 안의 json에 담김
+				let html = ''; // html 변수 : 게시글 HTML을 저장할 변수
+				
+				// moment().format() 함수 : Moment.js 라이브러리에서 제공해주는 함수
+    			// Moment.js : 날짜 데이터를 더욱 쉽게 컨트롤할 수 있도록 도와주는 JS 라이브러리
+    			
+    			// if : 데이터가 없는 경우 실행되는 로직
+    			// else :  데이터가 있는 경우 실행되는 로직
+    			// -> 데이터가 있는 경우, json에 담긴 객체의 길이(Length)만큼 forEach를 돌아 HTML을 그림
+    			
+    			/*
+    			 * 따옴표 대신 ` 기호를 사용 
+    			 * JS에서는 해당 기호를 백택이라 부르며, 백틱을 사용하면 ${} 표현식으로 데이터에 접근 가능
+    			 * 즉, 데이터나 문자열을 연결하기에 훨씬 수월해졌다는 것
+    			 * ex. ( + ) 기호를 사용하던 기존 방식
+    			 *     html += '<td>' + obj.title + '</td>';
+    			 *	   html += '<td>' + obj.writer + '</td>';
+    			 *	   html += '<td>' + obj.hits + '</td>';
+    			 */
+				if (!json.length) {
+					html = '<td colspan="5">등록된 게시글이 없습니다.</td>';
+				} else {
+					json.forEach((obj, idx) => {
+						html += `
+							<tr>
+    							<td>${json.length - idx}</td>
+    							<td class="text-left">
+    								<a href="javascript: void(0);">${obj.title}</a>
+    							</td>
+    							<td>${obj.writer}</td>
+    							<td>${moment(obj.createdDate).format('YYYY-MM-DD HH:mm:ss')}</td>
+    							<td>${obj.hits}</td>
+							</tr>
+						`;
+					});
+				}
+
+				document.getElementById('list').innerHTML = html;
+			});
+		}
+	/*]]>*/
+    </script>
+    </th:block>
+
+</html>
