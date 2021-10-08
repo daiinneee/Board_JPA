@@ -27,7 +27,7 @@
 
 			<div class="btn_wrap text-center">
 				<a th:href="@{/board/list}" class="btn btn-default waves-effect waves-light">뒤로가기</a>
-				<button type="button" class="btn btn-primary waves-effect waves-light">저장하기</button>
+				<button type="button" onclick="save();" class="btn btn-primary waves-effect waves-light">저장하기</button>
 			</div>
 		</form>
 	</div>
@@ -76,13 +76,25 @@
 		/**
 		 * 게시글 등록(생성/수정)
 		 */
+		 // save() 함수 : 게시글 등록 API를 호출하는 용도의 함수
+		 /* 
+		  * Fetch API
+		  * list.html의 findAll() 함수처럼, 단순히 데이터를 조회하는 경우에는 
+		  * fetch() 함수에 URI만 인자로 전달해주면 되지만, 
+		  * GET 방식이 아닌, POST, PUT, PATCH, DELETE 등의 요청(Request)에는
+		  * 필수적으로 옵션(method, headers, body 등)을 전달해 주어야 함
+		  */
 		function save() {
 		
+			// 위의 isValide() 함수를 이용해서 게시글 데이터의 유효성을 검사하고,
+			// 제목, 작성자, 내용 중 하나라도 입려되지 않은 경우에는 로직을 종료
 			if ( !isValid() ) {
 				return false;
 			}
 		
+			// form 변수 : 폼 안에 있는 제목, 작성자, 내용에 접근하기 위한 폼 엘리먼트
 			const form = document.getElementById('form');
+			// params 변수 : 제목, 작성자, 내용, 사용 여부 데이터를 전달하기 위한 객체
 			const params = {
 				title: form.title.value,
 				writer: form.writer.value,
@@ -90,6 +102,10 @@
 				deleteYn: 'N'
 			};
 		
+			// 두 번째 인자로 전달한 옵션 : method, headers, body
+			// method : 데이터 생성(Create)은 무조건 POST 방식을 이용
+			// headers : API 호출 시, GET 방식이 아닌 요청은 Content-Type을 application/json으로 설정
+			// body : 데이터 전달에 사용되는 옵션으로, params 객체에 담긴 게시글 정보를 API 서버로 전달
 			fetch('/api/boards', {
 				method: 'POST',
 				headers: {
@@ -97,8 +113,11 @@
 				},
 				body: JSON.stringify(params)
 		
+			// then() 안의 respone는 Promise 객체
 			}).then(response => {
-				if (!response.ok) {
+				if (!response.ok) { // 게시글 생성에 실패했을 경우에 실행
+									// Promise 객체의 ok 상태가 false인 경우, Error를 throw하고 catch문으로 빠지게 됨
+									// JAVA의 try/catch와 동일
 					throw new Error('Request failed...');
 				}
 		
